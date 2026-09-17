@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="https://res.cloudinary.com/dwwji955o/image/upload/v1774716687/logo_d1ln7s.jpg" type="image/jpeg">
+<title>Control de verticalidad — 6 tomas superpuestas</title>
+<style>
+  :root{
+    --ink:#f0f4f5; --panel:#1a2224; --panel2:#151a1b; --line:rgba(61,214,239,.18);
+    --cyan:#5BC8D9; --cyan-bright:#3DD6EF; --green:#6FDF5F; --muted:#9BBEC6;
+    --red:#ff6b6b;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    font-family:"Arial Narrow",Arial,system-ui,sans-serif;
+    font-size:15px;
+    background:linear-gradient(135deg,#1a5f6f 0%,#0d4450 100%);
+    color:var(--ink); overflow-x:hidden;
+  }
+
+  /* ── Header marca ── */
+  header{
+    background:linear-gradient(to bottom,#1f2829 0%,#151a1b 100%);
+    padding:14px 30px;display:flex;align-items:center;gap:18px;
+    box-shadow:0 4px 12px rgba(0,0,0,.3);
+  }
+  #logo{width:64px;height:64px;border-radius:50%;
+    border:3px solid #3D953A;box-shadow:0 0 15px rgba(61,149,58,.4);flex:none;
+    display:block;transition:transform .3s ease}
+  #logo:hover{transform:scale(1.05)}
+  header a{line-height:0}
+  .marca-txt{display:flex;flex-direction:column;gap:2px;line-height:1.2}
+  .marca-nom{font-size:22px;font-weight:bold;color:var(--cyan);letter-spacing:.5px}
+  .marca-nom span{color:var(--green)}
+  .marca-sub{font-size:14px;color:#5A8A94;font-style:italic}
+
+  #app{display:flex;height:78vh;min-height:520px}
+  #view{flex:1;position:relative}
+  canvas{display:block}
+  #panel{
+    width:320px;
+    background:linear-gradient(to bottom,#1f2829 0%,#151a1b 100%);
+    border-left:1px solid var(--line);
+    padding:22px 20px;overflow-y:auto;
+  }
+  h1{font-size:20px;line-height:1.25;font-weight:bold;margin-bottom:4px;color:var(--cyan)}
+  h1 span{color:var(--green)}
+  .sub{font-size:14px;color:var(--muted);line-height:1.5;margin-bottom:18px}
+  h2{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--cyan-bright);
+     margin:18px 0 9px;font-weight:bold;padding-bottom:6px;
+     border-bottom:1px solid rgba(61,214,239,.2)}
+  .toma{display:flex;align-items:center;gap:9px;padding:6px 8px;
+        border-radius:7px;cursor:pointer;user-select:none;font-size:15px;
+        color:var(--ink);transition:all .25s ease}
+  .toma:hover{background:rgba(61,214,239,.08);transform:translateX(4px)}
+  .toma.off{opacity:.35}
+  .sw{width:15px;height:15px;border-radius:4px;flex:none;
+      box-shadow:0 0 6px rgba(0,0,0,.4)}
+  .legend{font-size:14px;color:var(--muted);line-height:1.7;margin-top:6px}
+  .legend b{color:var(--cyan);font-weight:600}
+  table{width:100%;border-collapse:collapse;font-size:13px;margin-top:6px}
+  th,td{text-align:right;padding:3px 5px;border-bottom:1px solid rgba(255,255,255,.06)}
+  th:first-child,td:first-child{text-align:left}
+  th{color:var(--cyan);font-weight:600}
+  td{color:var(--ink)}
+  .note{font-size:12.5px;color:var(--muted);line-height:1.5;margin-top:16px;
+        border-top:1px solid var(--line);padding-top:12px}
+  .ctrls{font-size:13px;color:var(--muted);margin-top:10px;line-height:1.6}
+  .ctx{font-size:13.5px;color:var(--ink);line-height:1.55;
+    background:rgba(61,214,239,.06);border-left:3px solid var(--cyan);
+    padding:10px 12px;border-radius:0 7px 7px 0;margin-bottom:16px}
+  .ctx b{color:var(--cyan)}
+  .err{font-size:12.5px;color:var(--muted);line-height:1.6;margin-top:6px}
+  .err p{margin-bottom:9px}
+  .err b{color:var(--ink);font-weight:700}
+  .err .num{color:var(--green);font-weight:700}
+  .warn{color:#ff6b6b;font-weight:700}
+  .err .flag{background:rgba(255,107,107,.1);border-left:3px solid #ff6b6b;
+    padding:8px 11px;border-radius:0 6px 6px 0;display:block;margin-top:4px;color:var(--ink)}
+  button.toggle{font:inherit;font-size:12px;background:rgba(61,214,239,.08);
+    border:1px solid rgba(91,200,217,.4);
+    padding:5px 12px;border-radius:6px;cursor:pointer;color:var(--cyan);margin-top:8px;
+    transition:all .25s ease}
+  button.toggle:hover{background:rgba(61,214,239,.2);color:#90E8F5;border-color:var(--cyan)}
+
+  /* ── Footer (réplica ingeogop.xyz) ── */
+  footer{
+    background:linear-gradient(to bottom,#0d1e21 0%,#071218 100%);
+    border-top:1px solid rgba(61,214,239,.15);
+    color:#9BBEC6;font-family:"Arial Narrow",Arial,sans-serif;
+  }
+  .footer-contenido{display:grid;grid-template-columns:1.6fr 1fr 1.2fr;gap:48px;
+    max-width:1200px;margin:0 auto;padding:44px 48px 32px}
+  .footer-col{display:flex;flex-direction:column;gap:10px}
+  .footer-marca-top{display:flex;align-items:center;gap:16px;margin-bottom:6px}
+  .footer-logo{width:68px;height:68px;border-radius:50%;
+    border:2px solid rgba(255,255,255,.5);box-shadow:0 0 16px rgba(0,0,0,.3);flex-shrink:0}
+  .footer-marca-texto{display:flex;flex-direction:column;gap:3px}
+  .footer-nombre{font-size:25px;font-weight:bold;color:#5BC8D9;letter-spacing:.5px;line-height:1.2}
+  .footer-nombre span{color:#6FDF5F}
+  .footer-nit{font-size:15px;color:#5A8A94;letter-spacing:1px}
+  .footer-slogan{font-size:15px;color:#5A8A94;line-height:1.55;font-style:italic}
+  .footer-titulo{font-size:18px;font-weight:bold;color:#3DD6EF;text-transform:uppercase;
+    letter-spacing:2.5px;margin:0 0 6px 0;padding-bottom:8px;
+    border-bottom:1px solid rgba(61,214,239,.2)}
+  .footer-links{list-style:none;display:flex;flex-direction:column;gap:10px}
+  .footer-links a{color:#9BBEC6;text-decoration:none;font-size:16px;
+    transition:all .25s ease;display:flex;align-items:center;gap:8px;line-height:1.4}
+  .footer-links a:hover{color:#6FDF5F;transform:translateX(4px)}
+  .footer-icono-red{width:19px;height:19px;flex-shrink:0}
+  .footer-dir-item{display:flex;align-items:flex-start;gap:8px;color:#9BBEC6;
+    font-size:15px;line-height:1.5;list-style:none}
+  .footer-dir-pin{width:19px;flex-shrink:0;margin-top:1px}
+  .footer-bandera{width:20px;vertical-align:middle;margin-left:4px;border-radius:2px}
+  .footer-bottom{border-top:1px solid rgba(255,255,255,.06);padding:14px 48px;text-align:center}
+  .footer-bottom p{font-size:15px;color:#6FDF5F;letter-spacing:.3px}
+  @media (max-width:900px){
+    .footer-contenido{grid-template-columns:1fr 1fr;gap:28px;padding:32px 24px 24px}
+    #app{flex-direction:column;height:auto}
+    #view{height:60vh;min-height:380px}
+    #panel{width:100%;border-left:none;border-top:1px solid var(--line)}
+  }
+  @media (max-width:560px){
+    .footer-contenido{grid-template-columns:1fr;gap:22px;padding:26px 20px 20px}
+    header{flex-wrap:wrap;padding:14px 20px}
+  }
+</style>
+</head>
+<body>
+<header>
+  <a href="https://www.ingeogop.xyz" target="_blank" rel="noopener">
+    <img id="logo" src="https://res.cloudinary.com/dwwji955o/image/upload/v1774716687/logo_d1ln7s.jpg" alt="IngeoGOP Logo">
+  </a>
+  <div class="marca-txt">
+    <span class="marca-nom">Ingeo<span>GOP</span> Topografía</span>
+    <span class="marca-sub">Monitoreo de verticalidad post-sismo · Hotel Metropolis Plaza</span>
+  </div>
+</header>
+<div id="app">
+  <div id="view"></div>
+  <div id="panel">
+    <h1>Control de <span>verticalidad</span></h1>
+    <div class="sub">Monitoreo de aplomo en tiempo real · fachada / esquina estructural.</div>
+
+    <div class="ctx">
+      <b>Hotel Metropolis Plaza</b> — seguimiento post-sismo. Se controla si la vertical de la estructura se está desplazando entre lecturas sucesivas (4:47 pm → 6:10 pm). Cada punto es un blanco a distinta altura sobre un mismo elemento; su desplazamiento lateral revela la inclinación y si esta cambia con el tiempo.
+    </div>
+
+    <h2>TOMAS (clic para ocultar)</h2>
+    <div id="tomas"></div>
+
+    <button class="toggle" id="exagBtn">Exagerar desviación ×20</button>
+
+    <h2>NIVELES (clic para ocultar)</h2>
+    <div id="niveles"></div>
+
+    <h2>PUNTOS POR POSTE</h2>
+    <div class="legend">
+      <b>Arriba-arriba</b> — 15 m<br>
+      <b>Arriba</b> — 12 m<br>
+      <b>Medio</b> — 7.5 m<br>
+      <b>Abajo</b> — 0 m (referencia, 0°)
+    </div>
+
+    <h2>DESVIACIÓN LATERAL (mm)</h2>
+    <table id="tbl"><thead><tr><th>Toma</th><th>Med</th><th>Arr</th><th>A-A</th></tr></thead><tbody></tbody></table>
+
+    <h2>LECTURA E INTERPRETACIÓN</h2>
+    <div class="err">
+      <p><b>Escala de medida.</b> Distancia horizontal (DH) en <b>metros con precisión de mm</b> (25.7xx m). Ángulo horizontal (°H) en <b>grados-minutos-segundos</b>, con el punto Abajo fijado como <span class="num">0°00'00"</span>. El desplazamiento lateral se obtiene como X = DH·sen(Δ) y se reporta en <b>milímetros</b>.</p>
+
+      <p><b>Sensibilidad angular.</b> A 25.7 m de la estación, <span class="num">1"</span> de arco equivale a <span class="num">0.125 mm</span> en horizontal, y <span class="num">5"</span> ≈ <span class="num">0.62 mm</span>. Es la resolución con la que estás midiendo el aplomo: variaciones de pocos segundos ya son milímetros reales sobre la fachada.</p>
+
+      <p><b>Inclinación medida.</b> La cima (15 m) se desvía ≈ <span class="num">160 mm</span> respecto a la base, de forma constante hacia el mismo lado. Eso es una inclinación de <span class="num">0.60°–0.62°</span> (~37' de arco), equivalente a una pendiente cercana a <span class="num">1.07 %</span>. El signo negativo indica que todas las lecturas superiores caen al mismo costado de la vertical de referencia.</p>
+
+      <p><b>Repetibilidad entre tomas (el "error" del monitoreo).</b> Entre las 6 lecturas, la dispersión es de <span class="num">±1–3 mm</span> (desv. est.) en los cuatro niveles: Medio <span class="num">2.5 mm</span>, Arriba <span class="num">2.3 mm</span>, Arriba-arriba <span class="num">1.8 mm</span>. Es del orden del ruido esperable por puntería, refracción y estabilidad de la estación. <b>Conclusión: no se observa progresión de la inclinación en el intervalo</b> — la estructura se mantuvo estable, no se detecta movimiento activo entre las 4:47 y las 6:10 pm.</p>
+
+      <p><b>Control de calidad.</b> <span class="flag">La lectura del nivel <b>Medio</b> a las <b>5:32 pm</b> fue <b>verificada y corregida</b> (DH = <span class="num">25.707 m</span>); con la corrección, ese nivel dispersa <span class="num">3 mm</span>, en línea con el resto de la serie. La serie está depurada y todos los niveles son coherentes entre sí.</span></p>
+
+      <p style="color:#7a8a90;font-style:italic;margin-top:10px">Nota de alcance: estas son observaciones sobre los datos entregados, no un dictamen estructural. La aptitud de ocupación del edificio la define el ingeniero estructural responsable; conviene contrastar con más ciclos de medición y verificar la estabilidad del punto-estación.</p>
+    </div>
+
+    <div class="ctrls">Arrastrar: rotar · Rueda: zoom · Clic derecho + arrastrar: desplazar</div>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-contenido">
+    <div class="footer-col footer-marca">
+      <div class="footer-marca-top">
+        <img class="footer-logo" src="https://res.cloudinary.com/dwwji955o/image/upload/v1774716687/logo_d1ln7s.jpg" alt="IngeoGOP Logo">
+        <div class="footer-marca-texto">
+          <p class="footer-nombre">Ingeo<span>GOP</span> Topografía</p>
+          <p class="footer-nit">NIT: 1080042240-3</p>
+        </div>
+      </div>
+      <p class="footer-slogan">Precisión técnica en cada proyecto geoespacial.</p>
+    </div>
+
+    <div class="footer-col footer-redes">
+      <h3 class="footer-titulo">Redes Sociales</h3>
+      <ul class="footer-links">
+        <li><a href="https://www.facebook.com/ingeogop" target="_blank" rel="noopener"><img class="footer-icono-red" src="./svg/facebook.svg" alt="">Facebook</a></li>
+        <li><a href="https://www.instagram.com/ingeogop/" target="_blank" rel="noopener"><img class="footer-icono-red" src="./svg/instagram.svg" alt="">Instagram</a></li>
+        <li><a href="https://wa.me/573122920977" target="_blank" rel="noopener"><img class="footer-icono-red" src="./svg/whatsapp.svg" alt="">WhatsApp</a></li>
+      </ul>
+    </div>
+
+    <div class="footer-col footer-contacto">
+      <h3 class="footer-titulo">Contacto</h3>
+      <ul class="footer-links">
+        <li><a href="mailto:ingeogoptopografia@gmail.com">ingeogoptopografia@gmail.com</a></li>
+        <li><a href="tel:+573122920977"><img class="footer-icono-red" src="./svg/phone.svg" alt="">+57 312 292 0977</a></li>
+        <li class="footer-dir-item">
+          <img class="footer-dir-pin" src="./svg/map.svg" alt="">
+          <span class="footer-dir-texto">
+            <a href="https://maps.app.goo.gl/Ldumw8VQttDZyQsJ9" target="_blank" rel="noopener">Cl. 13b #20-41, Barrio Guayaquil, Cali, Valle del Cauca
+            <img class="footer-bandera" src="./svg/col.svg" alt="CO"></a>
+          </span>
+        </li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>© 2026 | Powered by IngeoGOP Topografía | Todos los derechos reservados.</p>
+  </div>
+</footer>
+
+<script type="importmap">
+{ "imports": {
+  "three":"https://cdnjs.cloudflare.com/ajax/libs/three.js/0.160.0/three.module.js"
+}}
+</script>
+<script type="module">
+import * as THREE from "three";
+
+/* ---------- DATOS ---------- */
+const Y = {Abajo:0, Medio:7.5, Arriba:12, ArribaArriba:15};
+function ang(d,m,s){let v=d+m/60+s/3600; return v>180? v-360 : v;}
+const RAW = {
+ "4:47pm":[["Abajo",25.737,0,0,0],["Medio",25.707,359,45,36],["Arriba",25.669,359,41,46],["ArribaArriba",25.776,359,38,30]],
+ "4:57pm":[["Abajo",25.733,0,0,0],["Medio",25.706,359,46,26],["Arriba",25.675,359,40,54],["ArribaArriba",25.781,359,38,18]],
+ "5:08pm":[["Abajo",25.738,0,0,0],["Medio",25.706,359,46,10],["Arriba",25.673,359,40,57],["ArribaArriba",25.782,359,38,45]],
+ "5:32pm":[["Abajo",25.738,0,0,0],["Medio",25.707,359,46,37],["Arriba",25.671,359,41,31],["ArribaArriba",25.782,359,38,59]],
+ "5:50pm":[["Abajo",25.734,0,0,0],["Medio",25.708,359,45,53],["Arriba",25.670,359,41,15],["ArribaArriba",25.776,359,38,24]],
+ "6:10pm":[["Abajo",25.736,0,0,0],["Medio",25.709,359,46,17],["Arriba",25.675,359,41,5],["ArribaArriba",25.776,359,38,23]],
+};
+const COLORS = {"4:47pm":0xff3b3b,"4:57pm":0xffab00,"5:08pm":0xffee00,
+                "5:32pm":0x2fe36b,"5:50pm":0x2f9bff,"6:10pm":0xc86bff};
+const ORDER = ["Abajo","Medio","Arriba","ArribaArriba"];
+
+// calcular puntos: devuelve {toma:[{name,x,y}]}
+const PTS = {};
+for(const t in RAW){
+  PTS[t] = RAW[t].map(([n,dh,d,m,s])=>{
+    const dd = ang(d,m,s);
+    const x = dh*Math.sin(dd*Math.PI/180); // metros, negativo
+    return {name:n, x, y:Y[n], mm:x*1000};
+  });
+}
+
+/* ---------- ESCENA ---------- */
+const view=document.getElementById("view");
+const scene=new THREE.Scene();
+scene.background=new THREE.Color(0x1a1c1e);
+const cam=new THREE.PerspectiveCamera(45,1,0.01,500);
+const renderer=new THREE.WebGLRenderer({antialias:true});
+view.appendChild(renderer.domElement);
+
+const world=new THREE.Group(); scene.add(world);
+// centrar verticalmente: bajamos el mundo 7.5
+world.position.y=-7.5;
+
+scene.add(new THREE.AmbientLight(0xffffff,1.0));
+const dl=new THREE.DirectionalLight(0xffffff,0.6); dl.position.set(5,10,7); scene.add(dl);
+
+/* eje vertical de referencia (plomada ideal en X=0) */
+{
+  const g=new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0,0,0),new THREE.Vector3(0,15,0)]);
+  const l=new THREE.Line(g,new THREE.LineDashedMaterial({color:0x5BC8D9,dashSize:0.3,gapSize:0.2,opacity:0.55,transparent:true}));
+  l.computeLineDistances(); world.add(l);
+}
+/* piso */
+{
+  const grid=new THREE.GridHelper(2,20,0x555555,0x2a2a2a);
+  grid.position.y=0; world.add(grid);
+}
+/* marcas de altura */
+const loader=null;
+const heightLabels=[[0,"0 m"],[7.5,"7.5 m"],[12,"12 m"],[15,"15 m"]];
+
+let EXAG=1;
+const tomaGroups={};
+let visible={}; for(const t in PTS) visible[t]=true;
+let lvlVisible={Abajo:true,Medio:true,Arriba:true,ArribaArriba:true};
+
+function makeSprite(text,color="#9BBEC6",size=42){
+  const c=document.createElement("canvas");const ctx=c.getContext("2d");
+  c.width=256;c.height=64;
+  ctx.font=`600 ${size}px Segoe UI, sans-serif`;ctx.fillStyle=color;
+  ctx.textBaseline="middle";ctx.fillText(text,4,32);
+  const tex=new THREE.CanvasTexture(c);tex.anisotropy=4;
+  const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:tex,depthTest:false,transparent:true}));
+  sp.scale.set(1.2,0.3,1);return sp;
+}
+heightLabels.forEach(([h,txt])=>{
+  const s=makeSprite(txt); s.position.set(0.25,h,0); world.add(s);
+});
+
+function buildTomas(){
+  for(const t in PTS){
+    const g=new THREE.Group();
+    const col=COLORS[t]??0x333333;
+    const pts=PTS[t];
+    // línea que une solo los niveles visibles, en orden
+    const linePts=ORDER.filter(n=>lvlVisible[n])
+      .map(n=>{const p=pts.find(q=>q.name===n);return new THREE.Vector3(p.x*EXAG,p.y,0);});
+    if(linePts.length>=2){
+      const lg=new THREE.BufferGeometry().setFromPoints(linePts);
+      g.add(new THREE.Line(lg,new THREE.LineBasicMaterial({color:col})));
+    }
+    // esferas solo de niveles visibles
+    pts.forEach(p=>{
+      if(!lvlVisible[p.name])return;
+      const m=new THREE.Mesh(new THREE.SphereGeometry(0.13,20,20),
+             new THREE.MeshStandardMaterial({color:col,roughness:.5}));
+      m.position.set(p.x*EXAG,p.y,0); g.add(m);
+    });
+    world.add(g); tomaGroups[t]=g;
+  }
+}
+function rebuild(){
+  for(const t in tomaGroups){ world.remove(tomaGroups[t]); }
+  for(const k in tomaGroups) delete tomaGroups[k];
+  buildTomas();
+  for(const t in tomaGroups) tomaGroups[t].visible=visible[t];
+}
+buildTomas();
+
+/* ---------- PANEL ---------- */
+const tomasDiv=document.getElementById("tomas");
+for(const t in PTS){
+  const col="#"+(COLORS[t]??0x333333).toString(16).padStart(6,"0");
+  const row=document.createElement("div");row.className="toma";
+  row.innerHTML=`<span class="sw" style="background:${col}"></span>${t}`;
+  row.onclick=()=>{visible[t]=!visible[t];tomaGroups[t].visible=visible[t];
+    row.classList.toggle("off",!visible[t]);};
+  tomasDiv.appendChild(row);
+}
+const LVL_LABEL={Abajo:"Abajo (0 m)",Medio:"Medio (7.5 m)",Arriba:"Arriba (12 m)",ArribaArriba:"Arriba-arriba (15 m)"};
+const nivDiv=document.getElementById("niveles");
+ORDER.slice().reverse().forEach(n=>{
+  const row=document.createElement("div");row.className="toma";
+  row.innerHTML=`<span class="sw" style="background:#3a6a72"></span>${LVL_LABEL[n]}`;
+  row.onclick=()=>{lvlVisible[n]=!lvlVisible[n];row.classList.toggle("off",!lvlVisible[n]);rebuild();};
+  nivDiv.appendChild(row);
+});
+
+const tb=document.querySelector("#tbl tbody");
+for(const t in PTS){
+  const p=PTS[t];const g=n=>p.find(q=>q.name===n).mm.toFixed(0);
+  const tr=document.createElement("tr");
+  tr.innerHTML=`<td>${t}</td><td>${g("Medio")}</td><td>${g("Arriba")}</td><td>${g("ArribaArriba")}</td>`;
+  tb.appendChild(tr);
+}
+document.getElementById("exagBtn").onclick=e=>{
+  EXAG = EXAG===1?20:1;
+  e.target.textContent = EXAG===1? "Exagerar desviación ×20":"Escala real ×1";
+  rebuild();
+};
+
+/* ---------- CONTROLES ORBIT (mínimos, sin dependencia extra) ---------- */
+let rot={x:-0.15,y:0.5},dist=26,pan={x:0,y:0};
+let drag=null,last={x:0,y:0};
+const el=renderer.domElement;
+el.addEventListener("mousedown",e=>{drag=e.button;last={x:e.clientX,y:e.clientY};});
+window.addEventListener("mouseup",()=>drag=null);
+window.addEventListener("mousemove",e=>{
+  if(drag===null)return;
+  const dx=e.clientX-last.x,dy=e.clientY-last.y;last={x:e.clientX,y:e.clientY};
+  if(drag===0){rot.y+=dx*0.008;rot.x+=dy*0.008;rot.x=Math.max(-1.4,Math.min(1.4,rot.x));}
+  else{pan.x-=dx*0.02;pan.y+=dy*0.02;}
+});
+el.addEventListener("contextmenu",e=>e.preventDefault());
+el.addEventListener("wheel",e=>{e.preventDefault();dist*=(1+Math.sign(e.deltaY)*0.08);
+  dist=Math.max(4,Math.min(120,dist));},{passive:false});
+
+function resize(){
+  const w=view.clientWidth,h=view.clientHeight;
+  renderer.setSize(w,h);renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+  cam.aspect=w/h;cam.updateProjectionMatrix();
+}
+window.addEventListener("resize",resize);resize();
+
+function animate(){
+  requestAnimationFrame(animate);
+  const cx=Math.cos(rot.x),sx=Math.sin(rot.x),cy=Math.cos(rot.y),sy=Math.sin(rot.y);
+  cam.position.set(pan.x+dist*cx*sy, pan.y+dist*sx, dist*cx*cy);
+  cam.lookAt(pan.x,pan.y,0);
+  renderer.render(scene,cam);
+}
+animate();
+</script>
+</body>
+</html>
