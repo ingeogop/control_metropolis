@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" href="https://res.cloudinary.com/dwwji955o/image/upload/v1774716687/logo_d1ln7s.jpg" type="image/jpeg">
-<title>Control de verticalidad — IngeoGOP Topografía</title>
+<title>Control de verticalidad — 6 tomas superpuestas</title>
 <style>
   :root{
     --ink:#f0f4f5; --panel:#1a2224; --panel2:#151a1b; --line:rgba(61,214,239,.18);
@@ -64,6 +64,7 @@
   th,td{text-align:right;padding:4px 6px;border-bottom:1px solid rgba(255,255,255,.06)}
   th:first-child,td:first-child{text-align:left}
   th{color:var(--cyan);font-weight:600}
+  .th-alt{font-size:12px;font-weight:400;color:var(--muted)}
   td{color:var(--ink)}
   .note{font-size:17px;color:var(--muted);line-height:1.55;margin-top:16px;
         border-top:1px solid var(--line);padding-top:12px}
@@ -79,6 +80,9 @@
   .warn{color:#ff6b6b;font-weight:700}
   .err .flag{background:rgba(255,107,107,.1);border-left:3px solid #ff6b6b;
     padding:8px 11px;border-radius:0 6px 6px 0;display:block;margin-top:4px;color:var(--ink)}
+  .err .alert{background:rgba(255,171,0,.12);border-left:3px solid #ffab00;
+    padding:9px 12px;border-radius:0 6px 6px 0;display:block;margin-top:4px;color:var(--ink)}
+  .err .alert b{color:#ffce55}
   button.toggle{font:inherit;font-size:17px;background:rgba(61,214,239,.08);
     border:1px solid rgba(91,200,217,.4);
     padding:5px 12px;border-radius:6px;cursor:pointer;color:var(--cyan);margin-top:8px;
@@ -145,7 +149,7 @@
     <div class="sub">Monitoreo de aplomo en tiempo real · fachada / esquina estructural.</div>
 
     <div class="ctx">
-      <b>Hotel Metropolis Plaza</b> — seguimiento post-sismo. Se controla si la vertical de la estructura se está desplazando entre lecturas sucesivas (4:47 pm → 6:10 pm). Cada punto es un blanco a distinta altura sobre un mismo elemento; su desplazamiento lateral revela la inclinación y si esta cambia con el tiempo.
+      <b>Hotel Metropolis Plaza</b> — seguimiento tras el sismo. La pregunta que resuelve esta medición es sencilla: ¿el edificio se está inclinando más con el paso de las horas, o se queda quieto? Para responderla marcamos cuatro puntos a distintas alturas sobre la misma esquina y los medimos varias veces entre las 4:47 y las 6:10 pm. Si esos puntos se corren hacia un lado con el tiempo, el edificio se está moviendo; si se quedan en su sitio, está estable.
     </div>
 
     <h2>TOMAS (clic para ocultar)</h2>
@@ -166,21 +170,21 @@
     </div>
 
     <h2>DESVIACIÓN LATERAL (mm)</h2>
-    <table id="tbl"><thead><tr><th>Toma</th><th>Med</th><th>Arr</th><th>A-A</th></tr></thead><tbody></tbody></table>
+    <table id="tbl"><thead><tr><th>Toma</th><th>Medio<br><span class="th-alt">7.5 m</span></th><th>Arriba<br><span class="th-alt">12 m</span></th><th>Arriba-arriba<br><span class="th-alt">15 m</span></th></tr></thead><tbody></tbody></table>
 
     <h2>LECTURA E INTERPRETACIÓN</h2>
     <div class="err">
-      <p><b>Escala de medida.</b> Distancia horizontal (DH) en <b>metros con precisión de mm</b> (25.7xx m). Ángulo horizontal (°H) en <b>grados-minutos-segundos</b>, con el punto Abajo fijado como <span class="num">0°00'00"</span>. El desplazamiento lateral se obtiene como X = DH·sen(Δ) y se reporta en <b>milímetros</b>.</p>
+      <p><b>Cómo se leen estos datos.</b> Cada punto se midió con dos valores: la <b>distancia horizontal</b> desde la estación hasta el blanco (los 25.7 m) y el <b>ángulo horizontal</b>, que dice hacia qué lado está girado ese punto respecto a una referencia fija. Tomamos el punto de abajo como el "cero" y, a partir de ahí, calculamos cuánto se corre cada punto hacia un costado. Ese corrimiento es lo que ves dibujado en 3D, y es lo que en obra llamamos el aplomo: si el edificio está derecho o inclinado.</p>
 
-      <p><b>Sensibilidad angular.</b> A 25.7 m de la estación, <span class="num">1"</span> de arco equivale a <span class="num">0.125 mm</span> en horizontal, y <span class="num">5"</span> ≈ <span class="num">0.62 mm</span>. Es la resolución con la que estás midiendo el aplomo: variaciones de pocos segundos ya son milímetros reales sobre la fachada.</p>
+      <p><b>Con qué se midió.</b> Se usó una estación total <b>RUIDE RQS</b>. Sin entrar en tecnicismos: es un instrumento capaz de detectar giros diminutos, tan pequeños que sobre esta fachada se traducen en fracciones de milímetro. Dicho de otro modo, si el edificio se mueve aunque sea un poco, el aparato lo ve.</p>
 
-      <p><b>Inclinación medida.</b> La cima (15 m) se desvía ≈ <span class="num">160 mm</span> respecto a la base, de forma constante hacia el mismo lado. Eso es una inclinación de <span class="num">0.60°–0.62°</span> (~37' de arco), equivalente a una pendiente cercana a <span class="num">1.07 %</span>. El signo negativo indica que todas las lecturas superiores caen al mismo costado de la vertical de referencia.</p>
+      <p><b>Qué tan inclinado está.</b> La parte más alta, a 15 m, aparece corrida unos <span class="num">16 cm</span> respecto a la base, y siempre hacia el mismo lado. En ángulo son cerca de <span class="num">0.6°</span>. No es un número dramático, pero tampoco es cero: el edificio no está perfectamente a plomo, y todos los niveles se inclinan en la misma dirección, que es justo el patrón que deja una estructura ladeada.</p>
 
-      <p><b>Repetibilidad entre tomas (el "error" del monitoreo).</b> Entre las 6 lecturas, la dispersión es de <span class="num">±1–3 mm</span> (desv. est.) en los cuatro niveles: Medio <span class="num">2.5 mm</span>, Arriba <span class="num">2.3 mm</span>, Arriba-arriba <span class="num">1.8 mm</span>. Es del orden del ruido esperable por puntería, refracción y estabilidad de la estación. <b>Conclusión: no se observa progresión de la inclinación en el intervalo</b> — la estructura se mantuvo estable, no se detecta movimiento activo entre las 4:47 y las 6:10 pm.</p>
+      <p><b>Lo que cambió entre una toma y otra.</b> Repetimos la medición seis veces en hora y media, apuntando siempre a los mismos puntos. Entre toma y toma los valores no salieron idénticos: bailaron unos pocos milímetros. Ese día había <b>viento fuerte</b> en la zona (se sentía de pie en el sitio) y la tarde venía enfriando, y un edificio alto y esbelto responde a eso flexionándose apenas, lo suficiente para que las lecturas se muevan un poco arriba y abajo.</p>
 
-      <p><b>Control de calidad.</b> <span class="flag">La lectura del nivel <b>Medio</b> a las <b>5:32 pm</b> fue <b>verificada y corregida</b> (DH = <span class="num">25.707 m</span>); con la corrección, ese nivel dispersa <span class="num">3 mm</span>, en línea con el resto de la serie. La serie está depurada y todos los niveles son coherentes entre sí.</span></p>
+      <p><b>Conclusión.</b> <span class="alert">Esas pequeñas diferencias entre tomas encajan con las <b>condiciones del momento —el viento, sobre todo—</b> y no con un edificio que se esté yendo de a poco. La señal clave está en el patrón: si la estructura estuviera cediendo, la inclinación crecería toma tras toma en la misma dirección, y aquí no pasa: sube y baja alrededor de un mismo valor. En la hora y media que duró el trabajo, <b>la estructura se mantuvo estable</b>.</span></p>
 
-      <p style="color:#7a8a90;font-style:italic;margin-top:10px">Nota de alcance: estas son observaciones sobre los datos entregados, no un dictamen estructural. La aptitud de ocupación del edificio la define el ingeniero estructural responsable; conviene contrastar con más ciclos de medición y verificar la estabilidad del punto-estación.</p>
+      <p style="color:#7a8a90;font-style:italic;margin-top:10px">Esto es lo que dicen las mediciones de campo, no un dictamen estructural. La última palabra sobre el estado del edificio la tiene el ingeniero estructural a cargo.</p>
     </div>
 
     <div class="ctrls">Arrastrar: rotar · Rueda: zoom · Clic derecho + arrastrar: desplazar</div>
