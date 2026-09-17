@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" href="https://res.cloudinary.com/dwwji955o/image/upload/v1774716687/logo_d1ln7s.jpg" type="image/jpeg">
-<title>Control de verticalidad — 6 tomas superpuestas</title>
+<title>Control de verticalidad — IngeoGOP Topografía</title>
 <style>
   :root{
     --ink:#f0f4f5; --panel:#1a2224; --panel2:#151a1b; --line:rgba(61,214,239,.18);
@@ -40,46 +40,46 @@
   #view{flex:1;position:relative}
   canvas{display:block}
   #panel{
-    width:320px;
+    width:420px;
     background:linear-gradient(to bottom,#1f2829 0%,#151a1b 100%);
     border-left:1px solid var(--line);
-    padding:22px 20px;overflow-y:auto;
+    padding:24px 24px;overflow-y:auto;
   }
-  h1{font-size:20px;line-height:1.25;font-weight:bold;margin-bottom:4px;color:var(--cyan)}
+  h1{font-size:28px;line-height:1.25;font-weight:bold;margin-bottom:4px;color:var(--cyan)}
   h1 span{color:var(--green)}
-  .sub{font-size:14px;color:var(--muted);line-height:1.5;margin-bottom:18px}
-  h2{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--cyan-bright);
-     margin:18px 0 9px;font-weight:bold;padding-bottom:6px;
+  .sub{font-size:18px;color:var(--muted);line-height:1.5;margin-bottom:18px}
+  h2{font-size:16px;letter-spacing:.1em;text-transform:uppercase;color:var(--cyan-bright);
+     margin:20px 0 10px;font-weight:bold;padding-bottom:6px;
      border-bottom:1px solid rgba(61,214,239,.2)}
-  .toma{display:flex;align-items:center;gap:9px;padding:6px 8px;
-        border-radius:7px;cursor:pointer;user-select:none;font-size:15px;
+  .toma{display:flex;align-items:center;gap:10px;padding:7px 9px;
+        border-radius:7px;cursor:pointer;user-select:none;font-size:18px;
         color:var(--ink);transition:all .25s ease}
   .toma:hover{background:rgba(61,214,239,.08);transform:translateX(4px)}
   .toma.off{opacity:.35}
-  .sw{width:15px;height:15px;border-radius:4px;flex:none;
+  .sw{width:17px;height:17px;border-radius:4px;flex:none;
       box-shadow:0 0 6px rgba(0,0,0,.4)}
-  .legend{font-size:14px;color:var(--muted);line-height:1.7;margin-top:6px}
+  .legend{font-size:18px;color:var(--muted);line-height:1.75;margin-top:6px}
   .legend b{color:var(--cyan);font-weight:600}
-  table{width:100%;border-collapse:collapse;font-size:13px;margin-top:6px}
-  th,td{text-align:right;padding:3px 5px;border-bottom:1px solid rgba(255,255,255,.06)}
+  table{width:100%;border-collapse:collapse;font-size:17px;margin-top:6px}
+  th,td{text-align:right;padding:4px 6px;border-bottom:1px solid rgba(255,255,255,.06)}
   th:first-child,td:first-child{text-align:left}
   th{color:var(--cyan);font-weight:600}
   td{color:var(--ink)}
-  .note{font-size:12.5px;color:var(--muted);line-height:1.5;margin-top:16px;
+  .note{font-size:17px;color:var(--muted);line-height:1.55;margin-top:16px;
         border-top:1px solid var(--line);padding-top:12px}
-  .ctrls{font-size:13px;color:var(--muted);margin-top:10px;line-height:1.6}
-  .ctx{font-size:13.5px;color:var(--ink);line-height:1.55;
+  .ctrls{font-size:17px;color:var(--muted);margin-top:10px;line-height:1.6}
+  .ctx{font-size:18px;color:var(--ink);line-height:1.55;
     background:rgba(61,214,239,.06);border-left:3px solid var(--cyan);
-    padding:10px 12px;border-radius:0 7px 7px 0;margin-bottom:16px}
+    padding:12px 14px;border-radius:0 7px 7px 0;margin-bottom:16px}
   .ctx b{color:var(--cyan)}
-  .err{font-size:12.5px;color:var(--muted);line-height:1.6;margin-top:6px}
+  .err{font-size:17px;color:var(--muted);line-height:1.65;margin-top:6px}
   .err p{margin-bottom:9px}
   .err b{color:var(--ink);font-weight:700}
   .err .num{color:var(--green);font-weight:700}
   .warn{color:#ff6b6b;font-weight:700}
   .err .flag{background:rgba(255,107,107,.1);border-left:3px solid #ff6b6b;
     padding:8px 11px;border-radius:0 6px 6px 0;display:block;margin-top:4px;color:var(--ink)}
-  button.toggle{font:inherit;font-size:12px;background:rgba(61,214,239,.08);
+  button.toggle{font:inherit;font-size:17px;background:rgba(61,214,239,.08);
     border:1px solid rgba(91,200,217,.4);
     padding:5px 12px;border-radius:6px;cursor:pointer;color:var(--cyan);margin-top:8px;
     transition:all .25s ease}
