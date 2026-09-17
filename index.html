@@ -31,10 +31,10 @@
     display:block;transition:transform .3s ease}
   #logo:hover{transform:scale(1.05)}
   header a{line-height:0}
-  .marca-txt{display:flex;flex-direction:column;gap:2px;line-height:1.2}
-  .marca-nom{font-size:22px;font-weight:bold;color:var(--cyan);letter-spacing:.5px}
+  .marca-txt{display:flex;flex-direction:column;gap:3px;line-height:1.2}
+  .marca-nom{font-size:26px;font-weight:bold;color:var(--cyan);letter-spacing:.5px}
   .marca-nom span{color:var(--green)}
-  .marca-sub{font-size:14px;color:#5A8A94;font-style:italic}
+  .marca-sub{font-size:17px;color:#5A8A94;font-style:italic}
 
   #app{display:flex;height:78vh;min-height:520px}
   #view{flex:1;position:relative}
@@ -152,6 +152,7 @@
     <div id="tomas"></div>
 
     <button class="toggle" id="exagBtn">Exagerar desviación ×20</button>
+    <button class="toggle" id="yscaleBtn">Altura: real ×1</button>
 
     <h2>NIVELES (clic para ocultar)</h2>
     <div id="niveles"></div>
@@ -265,31 +266,38 @@ for(const t in RAW){
 const view=document.getElementById("view");
 const scene=new THREE.Scene();
 scene.background=new THREE.Color(0x1a1c1e);
-const cam=new THREE.PerspectiveCamera(45,1,0.01,500);
+const cam=new THREE.PerspectiveCamera(45,1,0.01,6000);
 const renderer=new THREE.WebGLRenderer({antialias:true});
 view.appendChild(renderer.domElement);
 
 const world=new THREE.Group(); scene.add(world);
-// centrar verticalmente: bajamos el mundo 7.5
-world.position.y=-7.5;
+// centrar verticalmente (se recalcula con la escala Y)
+let YSCALE=1;
+function recenter(){ world.position.y = -7.5*YSCALE; }
+recenter();
 
 scene.add(new THREE.AmbientLight(0xffffff,1.0));
 const dl=new THREE.DirectionalLight(0xffffff,0.6); dl.position.set(5,10,7); scene.add(dl);
 
-/* eje vertical de referencia (plomada ideal en X=0) */
-{
-  const g=new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0,0,0),new THREE.Vector3(0,15,0)]);
+/* grupo de referencia (plomada + etiquetas de altura) reconstruible con YSCALE */
+const refGroup=new THREE.Group(); world.add(refGroup);
+const heightLabels=[[0,"0 m"],[7.5,"7.5 m"],[12,"12 m"],[15,"15 m"]];
+function buildRef(){
+  while(refGroup.children.length) refGroup.remove(refGroup.children[0]);
+  // plomada ideal en X=0
+  const g=new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0,0,0),new THREE.Vector3(0,15*YSCALE,0)]);
   const l=new THREE.Line(g,new THREE.LineDashedMaterial({color:0x5BC8D9,dashSize:0.3,gapSize:0.2,opacity:0.55,transparent:true}));
-  l.computeLineDistances(); world.add(l);
+  l.computeLineDistances(); refGroup.add(l);
+  // etiquetas
+  heightLabels.forEach(([h,txt])=>{
+    const s=makeSprite(txt); s.position.set(0.25,h*YSCALE,0); refGroup.add(s);
+  });
 }
-/* piso */
+/* piso (plano en Y=0, no depende de la escala vertical) */
 {
   const grid=new THREE.GridHelper(2,20,0x555555,0x2a2a2a);
   grid.position.y=0; world.add(grid);
 }
-/* marcas de altura */
-const loader=null;
-const heightLabels=[[0,"0 m"],[7.5,"7.5 m"],[12,"12 m"],[15,"15 m"]];
 
 let EXAG=1;
 const tomaGroups={};
@@ -305,9 +313,7 @@ function makeSprite(text,color="#9BBEC6",size=42){
   const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:tex,depthTest:false,transparent:true}));
   sp.scale.set(1.2,0.3,1);return sp;
 }
-heightLabels.forEach(([h,txt])=>{
-  const s=makeSprite(txt); s.position.set(0.25,h,0); world.add(s);
-});
+buildRef();
 
 function buildTomas(){
   for(const t in PTS){
@@ -316,7 +322,7 @@ function buildTomas(){
     const pts=PTS[t];
     // línea que une solo los niveles visibles, en orden
     const linePts=ORDER.filter(n=>lvlVisible[n])
-      .map(n=>{const p=pts.find(q=>q.name===n);return new THREE.Vector3(p.x*EXAG,p.y,0);});
+      .map(n=>{const p=pts.find(q=>q.name===n);return new THREE.Vector3(p.x*EXAG,p.y*YSCALE,0);});
     if(linePts.length>=2){
       const lg=new THREE.BufferGeometry().setFromPoints(linePts);
       g.add(new THREE.Line(lg,new THREE.LineBasicMaterial({color:col})));
@@ -326,7 +332,7 @@ function buildTomas(){
       if(!lvlVisible[p.name])return;
       const m=new THREE.Mesh(new THREE.SphereGeometry(0.13,20,20),
              new THREE.MeshStandardMaterial({color:col,roughness:.5}));
-      m.position.set(p.x*EXAG,p.y,0); g.add(m);
+      m.position.set(p.x*EXAG,p.y*YSCALE,0); g.add(m);
     });
     world.add(g); tomaGroups[t]=g;
   }
@@ -334,6 +340,7 @@ function buildTomas(){
 function rebuild(){
   for(const t in tomaGroups){ world.remove(tomaGroups[t]); }
   for(const k in tomaGroups) delete tomaGroups[k];
+  buildRef(); recenter();
   buildTomas();
   for(const t in tomaGroups) tomaGroups[t].visible=visible[t];
 }
@@ -371,6 +378,16 @@ document.getElementById("exagBtn").onclick=e=>{
   rebuild();
 };
 
+const YSTEPS=[1,0.5,0.25,0.1];
+const YLABELS={1:"Altura: real ×1",0.5:"Altura: comprimida ×½",0.25:"Altura: comprimida ×¼",0.1:"Altura: comprimida ×⅒"};
+let yi=0;
+document.getElementById("yscaleBtn").onclick=e=>{
+  yi=(yi+1)%YSTEPS.length;
+  YSCALE=YSTEPS[yi];
+  e.target.textContent=YLABELS[YSCALE];
+  rebuild();
+};
+
 /* ---------- CONTROLES ORBIT (mínimos, sin dependencia extra) ---------- */
 let rot={x:-0.15,y:0.5},dist=26,pan={x:0,y:0};
 let drag=null,last={x:0,y:0};
@@ -385,7 +402,7 @@ window.addEventListener("mousemove",e=>{
 });
 el.addEventListener("contextmenu",e=>e.preventDefault());
 el.addEventListener("wheel",e=>{e.preventDefault();dist*=(1+Math.sign(e.deltaY)*0.08);
-  dist=Math.max(4,Math.min(120,dist));},{passive:false});
+  dist=Math.max(0.2,Math.min(2000,dist));},{passive:false});
 
 function resize(){
   const w=view.clientWidth,h=view.clientHeight;
